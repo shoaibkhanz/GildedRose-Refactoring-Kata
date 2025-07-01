@@ -86,19 +86,19 @@ class BackstagePassesItem(FactoryItems):
         self.items.sell_in -= 1
 
         increment_value = (
-            0
-            if self.items.sell_in < 0
-            else 3
-            if self.items.sell_in <= 5
+            3
+            if self.items.sell_in > 0 and self.items.sell_in <= 5
             else 2
-            if self.items.sell_in <= 10
+            if self.items.sell_in > 5 and self.items.sell_in <= 10
             else 1
         )
         self.items.quality += increment_value
-        if self.items.quality > 50:
-            self.items.quality = 50
+        if self.items.sell_in < 0:
+            self.items.quality = 0
         elif self.items.quality < 1:
             self.items.quality = 0
+        elif self.items.quality > 50:
+            self.items.quality = 50
 
 
 class ConjuredItem(FactoryItems):
