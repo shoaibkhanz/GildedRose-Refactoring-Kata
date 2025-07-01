@@ -47,19 +47,20 @@ class AgedBrieItem(FactoryItems):
 
         - Each day, its `sell_in` decreases by 1.
         - Its `quality` increases by 1 per day.
-        - If `quality` is below 1, it gets an additional increase (though this may not be necessary based on rules).
+        - If `quality` is below 1, it gets an additional increase
         - Quality is capped at 50, and the logic ensures it never exceeds this limit.
         """
         self.items.sell_in -= 1
-        self.items.quality += 1
         if self.items.quality < 1:
-            self.items.quality += 1
+            self.items.quality = 0
         elif self.items.quality > 50:
             # NOTE: I could decrement the value by 1, however, this is to
             # avoid a situation where we manually assigned the value greater
             # than 51, for e.g. 52 then a decrementing would make it by 1
             # would make it 51 and not 50.
             self.items.quality = 50
+        else:
+            self.items.quality += 1
 
 
 class SulfurasItem(FactoryItems):
@@ -69,18 +70,35 @@ class SulfurasItem(FactoryItems):
 
 
 class BackstagePassesItem(FactoryItems):
+    """
+    Represents 'Backstage passes to a TAFKAL80ETC concert'.
+
+    Behavior:
+    - Quality increases as the concert date approaches:
+        - More than 10 days left: +1 per day
+        - 6 to 10 days left: +2 per day
+        - 1 to 5 days left: +3 per day
+    - After the concert (sell_in < 0), quality drops to 0
+    - Quality is capped at 50
+    """
+
     def update_quality(self) -> None:
         self.items.sell_in -= 1
-        if self.items.sell_in > 10:
-            self.items.quality += 1
-        elif self.items.sell_in <= 10 or self.items.sell_in > 5:
-            self.items.quality += 2
-        elif self.items.sell_in <= 5:
-            self.items.quality += 3
-        elif self.items.sell_in < 0:
-            self.items.quality = 0
-        elif self.items.quality > 50:
+
+        increment_value = (
+            0
+            if self.items.sell_in < 0
+            else 3
+            if self.items.sell_in <= 5
+            else 2
+            if self.items.sell_in <= 10
+            else 1
+        )
+        self.items.quality += increment_value
+        if self.items.quality > 50:
             self.items.quality = 50
+        elif self.items.quality < 1:
+            self.items.quality = 0
 
 
 class ConjuredItem(FactoryItems):
