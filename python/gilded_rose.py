@@ -3,6 +3,14 @@ from abc import ABC, abstractmethod
 
 
 class Item:
+    """
+    Represents an item in the Gilded Rose inventory.
+
+    Attributes:
+        name (str): The name of the item.
+        sell_in (int): The number of days we have to sell the item.
+        quality (int): The quality of the item.
+    """
     def __init__(self, name, sell_in, quality):
         self.name = name
         self.sell_in = sell_in
@@ -13,11 +21,21 @@ class Item:
 
 
 class FactoryItems(ABC):
+    """
+    Abstract base class for all item types in the Gilded Rose inventory system.
+
+    Subclasses must implement the `update_quality` method to define how the item's
+    quality and sell_in values are updated each day.
+    """
     def __init__(self, item: Item):
         self.items = item
 
     @abstractmethod
     def update_quality(self) -> None:
+        """
+        Update the quality and sell_in values of the item.
+        Must be implemented by subclasses.
+        """
         pass
 
 
@@ -102,6 +120,16 @@ class BackstagePassesItem(FactoryItems):
 
 
 class ConjuredItem(FactoryItems):
+    """
+    Represents 'Conjured' items.
+
+    Behavior:
+    - Quality degrades twice as fast as normal items:
+        - Decreases by 2 each day before sell_in date.
+        - Decreases by 4 each day after sell_in date has passed.
+    - Quality is never negative and is capped at 50.
+    """
+
     def update_quality(self) -> None:
         self.items.sell_in -= 1
         degrade_item = 4 if self.items.sell_in < 0 else 2
@@ -112,11 +140,11 @@ class ConjuredItem(FactoryItems):
 
 def ItemFactory(item: Item) -> FactoryItems:
     """
-    Factory function to create the appropriate FactoryItems subclass
+    Factory function to return the appropriate FactoryItems subclass
     based on the item's name.
 
     Args:
-        item (Item): The item to wrap in a FactoryItems subclass.
+        item (Item): The item to wrap.
 
     Returns:
         FactoryItems: An instance of the appropriate subclass for the item.
@@ -137,21 +165,26 @@ class GildedRose:
     """
     The GildedRose class manages a collection of items and updates their quality and sell_in values
     according to their specific rules.
-    """
 
+    Attributes:
+        items (list): A list of Item objects to be managed.
+
+    Methods:
+        update_quality(): Updates the quality and sell_in of all items in the collection.
+    """
     def __init__(self, items):
         """
-        Initialize the GildedRose with a list of items.
+        Initializes the GildedRose with a list of items.
 
         Args:
-            items (list): A list of Item objects to be managed.
+            items (list): A list of Item objects.
         """
         self.items = items
 
     def update_quality(self):
         """
-        Update the quality and sell_in values of all items in the collection
-        by delegating to the appropriate item-specific update logic.
+        Updates the quality and sell_in values for all items in the collection
+        using the appropriate item-specific logic.
 
         Returns:
             list: A list of results from each item's update_quality method (typically None).
