@@ -111,6 +111,16 @@ class ConjuredItem(FactoryItems):
 
 
 def ItemFactory(item: Item) -> FactoryItems:
+    """
+    Factory function to create the appropriate FactoryItems subclass
+    based on the item's name.
+
+    Args:
+        item (Item): The item to wrap in a FactoryItems subclass.
+
+    Returns:
+        FactoryItems: An instance of the appropriate subclass for the item.
+    """
     if item.name.startswith("Aged Brie"):
         return AgedBrieItem(item=item)
     elif item.name.startswith("Sulfuras"):
@@ -124,10 +134,28 @@ def ItemFactory(item: Item) -> FactoryItems:
 
 
 class GildedRose:
+    """
+    The GildedRose class manages a collection of items and updates their quality and sell_in values
+    according to their specific rules.
+    """
+
     def __init__(self, items):
+        """
+        Initialize the GildedRose with a list of items.
+
+        Args:
+            items (list): A list of Item objects to be managed.
+        """
         self.items = items
 
     def update_quality(self):
+        """
+        Update the quality and sell_in values of all items in the collection
+        by delegating to the appropriate item-specific update logic.
+
+        Returns:
+            list: A list of results from each item's update_quality method (typically None).
+        """
         items_list = [ItemFactory(item=item).update_quality() for item in self.items]
         return items_list
 
